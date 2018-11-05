@@ -1,28 +1,54 @@
 defmodule KataTest do
   use ExUnit.Case
-  doctest Kata
+  alias Kata.Set, as: Set
 
-  test "player 1 wins scenarios" do
-    assert Kata.play(:rock, :scissors) == :player1Wins
-    assert Kata.play(:scissors, :paper) == :player1Wins
-    assert Kata.play(:paper, :rock) == :player1Wins
+  setup do
+    empty = Set.new()
+    one = Set.new() |> Set.add("a")
+    many = Set.new() |> Set.add("a") |> Set.add("b")
+
+    {:ok, empty: empty, one: one, many: many}
   end
 
-  test "player 2 wins scenarios" do
-    assert Kata.play(:rock, :paper) == :player2Wins
-    assert Kata.play(:paper, :scissors) == :player2Wins
-    assert Kata.play(:scissors, :rock) == :player2Wins
+  test "emptiness", %{empty: empty, one: one, many: many} do
+    assert (empty |> Set.isEmpty()) == true
+    assert (one |> Set.isEmpty()) == false
+    assert (many |> Set.isEmpty()) == false
   end
 
-  test "invalid plays" do
-    assert Kata.play(:rock, :sailboat) == :invalid
-    assert Kata.play(:invalid, :invalid) == :invalid
+  test "size", %{empty: empty, one: one, many: many} do
+    assert (empty |> Set.size()) == 0
+    assert (one |> Set.size()) == 1
+    assert (many |> Set.size()) > 1
   end
 
-  test "tie scenarios" do
-    assert Kata.play(:rock, :rock) == :tie
-    assert Kata.play(:paper, :paper) == :tie
-    assert Kata.play(:scissors, :scissors) == :tie
+  test "contains", %{empty: empty, one: one, many: many} do
+    assert empty |> Set.contains("a") == false
+    assert one |> Set.contains("a") == true
+    assert one |> Set.contains("b") == false
+    assert many |> Set.contains("a") == true
+    assert many |> Set.contains("b") == true
   end
 
+  test "remove" do
+    set = Set.new() |> Set.add("a") |> Set.add("b") |> Set.add("c")
+    originalSize = set |> Set.size()
+
+    result = set |> Set.remove("a")
+
+    assert result |> Set.size() == originalSize - 1
+    assert result |> Set.contains("a") == false
+  end
+
+  test "remove an item that does not exist", %{one: one} do
+    result = one |> Set.remove("an item that does not exist")
+
+    assert result |> Set.size() == 1
+  end
+
+  test "ignores duplicates", %{one: one} do
+    result = one |> Set.add("a")
+
+    assert result |> Set.size() == 1
+  end
 end
